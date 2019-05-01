@@ -12,27 +12,27 @@ type test struct {
 
 func NewTest() i.Exchange {
 	return &test{
-		Balance: newTestBalance(1),
+		Balance: newTestBalance(2),
 	}
 }
 
 type testBalance struct {
 	i.Balance
 
-	Amount float64
+	Amount i.BalanceType
 }
 
 func newTestBalance(amount float64) i.Balance {
 	return &testBalance{
-		Amount: amount,
+		Amount: i.BalanceType(amount),
 	}
 }
 
-func (tb *testBalance) Available() float64 {
+func (tb *testBalance) Available() i.BalanceType {
 	return tb.Amount
 }
 
-func (tb *testBalance) Update(amount float64) {
+func (tb *testBalance) Update(amount i.BalanceType) {
 	tb.Amount = tb.Amount + amount
 }
 
@@ -40,7 +40,7 @@ func (t *test) GetBalance() i.Balance {
 	return t.Balance
 }
 
-func (t *test) Buy(amount float64) error {
+func (t *test) Buy(amount i.BalanceType) error {
 	t.Balance.Update(-amount)
 	return nil
 }

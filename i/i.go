@@ -9,15 +9,16 @@ type Account interface {
 type Context interface {
 	GetMarket() Market
 	SetAmount(float64) error
-	GetAmount() float64
+	GetAmount() BalanceType
 }
 
+type BalanceType float64
 type Balance interface {
-	Available() float64
-	Update(float64)
+	Available() BalanceType
+	Update(BalanceType)
 }
 
 type Exchange interface {
 	GetBalance() Balance
-	Buy(amount float64) error
+	Buy(amount BalanceType) error
 }

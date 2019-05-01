@@ -7,14 +7,14 @@ import (
 type contextImpl struct {
 	i.Context
 
-	Amount float64
+	Amount i.BalanceType
 }
 
 func (c *contextImpl) SetAmount(amount float64) error {
-	c.Amount = amount
+	c.Amount = i.BalanceType(amount)
 	return nil
 }
-func (c *contextImpl) GetAmount() float64 {
+func (c *contextImpl) GetAmount() i.BalanceType {
 	return c.Amount
 }
 
