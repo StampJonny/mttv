@@ -5,13 +5,31 @@ import (
 
 	"github.com/stampjohnny/mttv/context"
 	"github.com/stampjohnny/mttv/signal"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestBuy(t *testing.T) {
+type TestSuite struct {
+	suite.Suite
+}
+
+func TestRun(t *testing.T) {
+	suite.Run(t, new(TestSuite))
+}
+
+func (s *TestSuite) TestBuy() {
 	ctx := context.New()
 
 	signal, err := signal.Find(ctx)
-	assert.NoError(t, err)
-	assert.NotNil(t, signal)
+	s.shouldBeValidSignal(err, signal)
+	s.shoudlBeBuySignal(signal)
+
+}
+
+func (s *TestSuite) shoudlBeBuySignal(signal signal.Signal) {
+	s.True(signal.IsBuySignal())
+}
+
+func (s *TestSuite) shouldBeValidSignal(err error, signal signal.Signal) {
+	s.NoError(err)
+	s.NotNil(signal)
 }
