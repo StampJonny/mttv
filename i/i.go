@@ -13,12 +13,14 @@ type Context interface {
 }
 
 type BalanceType float64
+
 type Balance interface {
 	Available() BalanceType
 	Update(BalanceType)
 }
 
 type Exchange interface {
-	GetBalance() Balance
+	GetMoneyBalance() Balance
+	GetCryptoBalance() Balance
 	Buy(amount BalanceType) error
 }

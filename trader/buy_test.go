@@ -19,7 +19,8 @@ func TestRun(t *testing.T) {
 	suite.Run(t, new(TestSuite))
 }
 
-var availableBalance i.BalanceType
+var availableMoneyBalance i.BalanceType
+var availableCryptoBalance i.BalanceType
 
 func (s *TestSuite) TestBuyPositive() {
 	s.mockExchange()
@@ -29,11 +30,17 @@ func (s *TestSuite) TestBuyPositive() {
 	s.givenTraderBoughtCrypto()
 
 	s.accountMoneyBalanceDecreased()
+	s.accountCryptoBalanceIncreased()
+}
+
+func (s *TestSuite) accountCryptoBalanceIncreased() {
+	exp := availableCryptoBalance + 0.001
+	s.Equal(exp, exchange.GetCryptoBalance().Available())
 }
 
 func (s *TestSuite) accountMoneyBalanceDecreased() {
-	exp := availableBalance - 0.001
-	s.Equal(exp, exchange.GetBalance().Available())
+	exp := availableMoneyBalance - 0.001
+	s.Equal(exp, exchange.GetMoneyBalance().Available())
 }
 
 func (s *TestSuite) givenTraderBoughtCrypto() {
@@ -53,5 +60,6 @@ func (s *TestSuite) mockExchange() {
 }
 
 func (s *TestSuite) saveBalance() {
-	availableBalance = exchange.GetBalance().Available()
+	availableMoneyBalance = exchange.GetMoneyBalance().Available()
+	availableCryptoBalance = exchange.GetCryptoBalance().Available()
 }

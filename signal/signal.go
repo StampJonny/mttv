@@ -1,7 +1,5 @@
 package signal
 
-import "github.com/stampjohnny/mttv/context"
-
 type ResponseStatus int
 
 const (
@@ -24,7 +22,7 @@ func (r *responseImpl) GetStatus() ResponseStatus {
 
 type Signal interface {
 	IsBuySignal() bool
-	GetResponse(context.Context) Response
+	// GetResponse(context.Context) Response
 }
 
 type signalImpl struct {
@@ -39,12 +37,12 @@ func (s *signalImpl) IsBuySignal() bool {
 	return true
 }
 
-func GetResponse(ctx context.Context) Response {
-	return &responseImpl{
-		Status: StatusOK,
-	}
-}
+// func GetResponse(ctx context.Context) Response {
+// 	return &responseImpl{
+// 		Status: StatusOK,
+// 	}
+// }
 
-func Find(context context.Context) (Signal, error) {
-	return &signalImpl{}, nil
-}
+// func Find(context context.Context) (Signal, error) {
+// 	return &signalImpl{}, nil
+// }

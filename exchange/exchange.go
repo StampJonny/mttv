@@ -17,6 +17,9 @@ func Buy() error {
 	return currentExchange.Buy(context.GetAmount())
 }
 
-func GetBalance() i.Balance {
-	return currentExchange.GetBalance()
+func GetMoneyBalance() i.Balance {
+	return currentExchange.GetMoneyBalance()
+}
+func GetCryptoBalance() i.Balance {
+	return currentExchange.GetCryptoBalance()
 }

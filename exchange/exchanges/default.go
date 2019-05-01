@@ -7,13 +7,8 @@ import (
 type test struct {
 	i.Exchange
 
-	Balance i.Balance
-}
-
-func NewTest() i.Exchange {
-	return &test{
-		Balance: newTestBalance(2),
-	}
+	MoneyBalance  i.Balance
+	CryptoBalance i.Balance
 }
 
 type testBalance struct {
@@ -36,11 +31,23 @@ func (tb *testBalance) Update(amount i.BalanceType) {
 	tb.Amount = tb.Amount + amount
 }
 
-func (t *test) GetBalance() i.Balance {
-	return t.Balance
+func NewTest() i.Exchange {
+	return &test{
+		MoneyBalance:  newTestBalance(2),
+		CryptoBalance: newTestBalance(2),
+	}
 }
 
-func (t *test) Buy(amount i.BalanceType) error {
-	t.Balance.Update(-amount)
+func (t *test) GetMoneyBalance() i.Balance {
+	return t.MoneyBalance
+}
+func (t *test) GetCryptoBalance() i.Balance {
+	return t.CryptoBalance
+}
+
+func (t *test) Buy(amountCrypto i.BalanceType) error {
+	t.CryptoBalance.Update(amountCrypto)
+	amountMoney := amountCrypto
+	t.MoneyBalance.Update(-amountMoney)
 	return nil
 }
