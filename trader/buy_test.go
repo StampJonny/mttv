@@ -18,11 +18,19 @@ func TestRun(t *testing.T) {
 
 func (s *TestSuite) TestBuy() {
 	ctx := context.New()
+	s.True(ctx.IsValid())
+	// s.True(user.GetBalance(ctx.GetMarket()))
+	sig, err := signal.Find(ctx)
+	s.shouldBeValidSignal(err, sig)
+	s.shoudlBeBuySignal(sig)
 
-	signal, err := signal.Find(ctx)
-	s.shouldBeValidSignal(err, signal)
-	s.shoudlBeBuySignal(signal)
+	r := signal.GetResponse(ctx)
+	s.shouldBePositiveResponse(r)
 
+}
+
+func (s *TestSuite) shouldBePositiveResponse(r signal.Response) {
+	s.Equal(signal.StatusOK, r.GetStatus())
 }
 
 func (s *TestSuite) shoudlBeBuySignal(signal signal.Signal) {
