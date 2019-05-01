@@ -1,17 +1,33 @@
 package context
 
-type Context interface {
-	IsValid() bool
-}
+import (
+	"github.com/stampjohnny/mttv/i"
+)
 
 type contextImpl struct {
-	Context
+	i.Context
+
+	Amount float64
 }
 
-func (c *contextImpl) IsValid() bool {
-	return true
+func (c *contextImpl) SetAmount(amount float64) error {
+	c.Amount = amount
+	return nil
+}
+func (c *contextImpl) GetAmount() float64 {
+	return c.Amount
 }
 
-func New() Context {
+func New() i.Context {
 	return &contextImpl{}
+}
+
+var currentContext i.Context
+
+func GetCurrentContext() i.Context {
+	return currentContext
+}
+
+func SetCurrentContext(context i.Context) {
+	currentContext = context
 }
