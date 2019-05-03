@@ -1,25 +1,47 @@
 package exchange
 
 import (
+	"fmt"
+
+	"github.com/google/uuid"
 	"github.com/stampjohnny/mttv/context"
-	"github.com/stampjohnny/mttv/i"
 )
 
-var currentExchange i.Exchange
+type Exchange interface {
+	GetMoneyBalance() float64
+	GetCryptoBalance() float64
+	Buy(float64) error
+	GetName() string
+}
 
-func SetExchange(exchange i.Exchange) error {
-	currentExchange = exchange
+var currentExchange Exchange
+
+func SetExchange(stock Exchange) error {
+	currentExchange = stock
 	return nil
 }
 
-func Buy() error {
-	context := context.GetCurrentContext()
-	return currentExchange.Buy(context.GetAmount())
+type TransactionID uuid.UUID
+
+func Buy() (uuid.UUID, error) {
+	txn, _ := uuid.NewRandom()
+	ctx := context.Get()
+	amount := ctx.GetCryptoAmount()
+	if err := currentExchange.Buy(amount); err != nil {
+		return txn, fmt.Errorf("can't buy through exchange %s: %s", currentExchange.GetName(), err)
+
+	}
+	ctx.SetTransactionID(txn)
+	return txn, nil
 }
 
-func GetMoneyBalance() i.Balance {
+type Available interface {
+	Available() float64
+}
+
+func GetMoneyBalance() float64 {
 	return currentExchange.GetMoneyBalance()
 }
-func GetCryptoBalance() i.Balance {
+func GetCryptoBalance() float64 {
 	return currentExchange.GetCryptoBalance()
 }

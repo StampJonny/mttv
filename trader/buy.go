@@ -1,8 +1,11 @@
 package trader
 
-import "github.com/stampjohnny/mttv/exchange"
+import (
+	"github.com/google/uuid"
+	"github.com/stampjohnny/mttv/exchange"
+)
 
-func Buy() error {
-	err := exchange.Buy()
-	return err
+func Buy() (uuid.UUID, error) {
+	tx, err := exchange.Buy()
+	return tx, err
 }

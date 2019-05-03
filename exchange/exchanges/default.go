@@ -1,51 +1,50 @@
 package exchanges
 
-import (
-	"github.com/stampjohnny/mttv/i"
-)
+const exchangeName = "Test exchange"
 
-type test struct {
-	i.Exchange
-
-	MoneyBalance  i.Balance
-	CryptoBalance i.Balance
+type TestExchange struct {
+	MoneyBalance  *testBalance
+	CryptoBalance *testBalance
 }
 
 type testBalance struct {
-	i.Balance
-
-	Amount i.BalanceType
+	Amount float64
 }
 
-func newTestBalance(amount float64) i.Balance {
+func newTestBalance(amount float64) *testBalance {
 	return &testBalance{
-		Amount: i.BalanceType(amount),
+		Amount: float64(amount),
 	}
 }
 
-func (tb *testBalance) Available() i.BalanceType {
+func (tb *testBalance) Available() float64 {
 	return tb.Amount
 }
 
-func (tb *testBalance) Update(amount i.BalanceType) {
+func (tb *testBalance) Update(amount float64) {
 	tb.Amount = tb.Amount + amount
 }
 
-func NewTest() i.Exchange {
-	return &test{
+func NewTest() *TestExchange {
+	return &TestExchange{
 		MoneyBalance:  newTestBalance(2),
 		CryptoBalance: newTestBalance(2),
 	}
 }
 
-func (t *test) GetMoneyBalance() i.Balance {
-	return t.MoneyBalance
-}
-func (t *test) GetCryptoBalance() i.Balance {
-	return t.CryptoBalance
+func (t *TestExchange) GetMoneyBalance() float64 {
+	return t.MoneyBalance.Available()
 }
 
-func (t *test) Buy(amountCrypto i.BalanceType) error {
+func (t *TestExchange) GetCryptoBalance() float64 {
+	return t.CryptoBalance.Available()
+}
+
+func (t *TestExchange) GetName() string {
+	return "Test Exchange"
+}
+
+func (t *TestExchange) Buy(amountCrypto float64) error {
 	t.CryptoBalance.Update(amountCrypto)
 	amountMoney := amountCrypto
 	t.MoneyBalance.Update(-amountMoney)
