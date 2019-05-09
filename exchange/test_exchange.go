@@ -26,6 +26,12 @@ func (t *TestExchange) Buy(amount float64) error {
 	return nil
 }
 
+func (t *TestExchange) SetDefault() {
+	t.cryptoBalance = float64(100)
+	t.moneyBalance = float64(100000)
+	t.price = 5600
+}
+
 func (t *TestExchange) GetCryptoBalance() float64 {
 	return t.cryptoBalance
 }
@@ -52,6 +58,10 @@ func (t *TestExchange) SetMoneyBalance(amount float64) error {
 
 func (t *TestExchange) SetPrice(price float64) {
 	t.price = price
+}
+
+func (t *TestExchange) GetPrice() float64 {
+	return t.price
 }
 
 func (t *TestExchange) Save() error {

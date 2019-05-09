@@ -1,6 +1,9 @@
 package exchange
 
-import "fmt"
+import (
+	"github.com/stampjohnny/mttv/e"
+	"github.com/stampjohnny/mttv/logging"
+)
 
 type Exchange interface {
 	SetCryptoBalance(float64) error
@@ -8,18 +11,19 @@ type Exchange interface {
 	SetMoneyBalance(float64) error
 	GetMoneyBalance() float64
 	SetPrice(float64)
+	GetPrice() float64
 	Buy(float64) error
 	// GetName() string
 }
 
 var currentExchange Exchange
 
-type Callback func(Exchange)
+type Callback func(interface{})
 
 func SetTestExchange(callbacks ...interface{}) error {
 	currentExchange = &TestExchange{}
 	for _, callback := range callbacks {
-		callbackFunc := callback.(func(Exchange))
+		callbackFunc := callback.(func(interface{}))
 		callbackFunc(currentExchange)
 	}
 	return nil
@@ -29,13 +33,21 @@ func SetExchange(stockName string) error {
 	if exchange := GetExchange(exchangeName); exchange != nil {
 		currentExchange = exchange
 	} else {
-		return fmt.Errorf("no exchange with name: %s", stockName)
+		return e.Err("no exchange with name: %s", stockName)
 	}
 	return nil
 }
 
 func Buy(amount float64) error {
-	return currentExchange.Buy(amount)
+	ctx := currentExchange.Buy(amount)
+	log, err := logging.Get(logging.TradingLog)
+	if err != nil {
+		return e.Err("can't get logger: %s", err)
+	}
+
+	log.Log(logging.Fields{"amount": amount}, "buy")
+
+	return ctx
 }
 
 func GetCryptoBalance() float64 {
@@ -58,6 +70,10 @@ func SetPrice(price float64) {
 	currentExchange.SetPrice(price)
 }
 
+func GetPrice() float64 {
+	return currentExchange.GetPrice()
+}
+
 // type TransactionID uuid.UUID
 
 // func Buy() (uuid.UUID, error) {
@@ -70,15 +86,4 @@ func SetPrice(price float64) {
 // 	}
 // 	ctx.SetTransactionID(txn)
 // 	return txn, nil
-// }
-
-// type Available interface {
-// 	Available() float64
-// }
-
-// func GetMoneyBalance() float64 {
-// 	return currentExchange.GetMoneyBalance()
-// }
-// func GetCryptoBalance() float64 {
-// 	return currentExchange.GetCryptoBalance()
 // }
