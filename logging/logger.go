@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
+	"github.com/stampjohnny/mttv/e"
 	"github.com/stampjohnny/mttv/utils"
 )
 
-var TradingLog = "logs/trading"
+var BuyLog = "logs/buy"
 
 type Logger struct {
 	filepath string
@@ -29,13 +30,36 @@ func Get(name string) (*Logger, error) {
 	return l, nil
 }
 
+func LogBuyContext(buyContext interface {
+	GetAmount() float64
+	GetMoneyBalance() float64
+}) error {
+	l, err := Get(BuyLog)
+	if err != nil {
+		return e.Err("can't get logger %s: %v", BuyLog, err)
+	}
+
+	amount := buyContext.GetAmount()
+	Debug("amount=%v", amount)
+	money := buyContext.GetMoneyBalance()
+	Debug("money=%v", money)
+
+	l.log.WithFields(Fields{
+		"amount": amount,
+		"money":  money,
+	}).Info("buy")
+
+	return nil
+}
+
 func (l *Logger) GetFilepath() string {
 	return l.filepath
 }
 
-func (l *Logger) Log(fields Fields, message string) {
-	l.log.WithFields(fields).Info(message)
+func (l *Logger) Log(message string) {
+	l.log.Info(message)
 }
+
 func (l *Logger) Remove() error {
 	return os.RemoveAll(l.filepath)
 }
@@ -47,7 +71,7 @@ func (l *Logger) Init() error {
 	}
 
 	l.log = logrus.New()
-	l.log.Formatter = new(logrus.JSONFormatter)
+	l.log.Formatter = new(logrus.TextFormatter)
 	l.log.Level = logrus.DebugLevel
 	l.log.Out = f
 

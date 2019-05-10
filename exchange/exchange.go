@@ -3,6 +3,7 @@ package exchange
 import (
 	"github.com/stampjohnny/mttv/e"
 	"github.com/stampjohnny/mttv/logging"
+	"github.com/stampjohnny/mttv/utils"
 )
 
 type Exchange interface {
@@ -10,15 +11,13 @@ type Exchange interface {
 	GetCryptoBalance() float64
 	SetMoneyBalance(float64) error
 	GetMoneyBalance() float64
-	SetPrice(float64)
+	SetPrice(float64) error
 	GetPrice() float64
-	Buy(float64) error
+	Buy(float64) (interface{}, error)
 	// GetName() string
 }
 
 var currentExchange Exchange
-
-type Callback func(interface{})
 
 func SetTestExchange(callbacks ...interface{}) error {
 	currentExchange = &TestExchange{}
@@ -33,21 +32,25 @@ func SetExchange(stockName string) error {
 	if exchange := GetExchange(exchangeName); exchange != nil {
 		currentExchange = exchange
 	} else {
-		return e.Err("no exchange with name: %s", stockName)
+		return e.Err("no exchange with name: %v", stockName)
 	}
 	return nil
 }
 
-func Buy(amount float64) error {
-	ctx := currentExchange.Buy(amount)
-	log, err := logging.Get(logging.TradingLog)
+func Buy(amount float64) (interface{}, error) {
+	ctx, err := currentExchange.Buy(amount)
 	if err != nil {
-		return e.Err("can't get logger: %s", err)
+		return nil, e.Err("can't buy crypto: %v", err)
 	}
 
-	log.Log(logging.Fields{"amount": amount}, "buy")
+	if err := logging.LogBuyContext(ctx.(interface {
+		GetAmount() float64
+		GetMoneyBalance() float64
+	})); err != nil {
+		utils.Crash("can't log operation %v", err)
+	}
 
-	return ctx
+	return ctx, nil
 }
 
 func GetCryptoBalance() float64 {
@@ -66,8 +69,8 @@ func SetMoneyBalance(amount float64) {
 	currentExchange.SetMoneyBalance(amount)
 }
 
-func SetPrice(price float64) {
-	currentExchange.SetPrice(price)
+func SetPrice(price float64) error {
+	return currentExchange.SetPrice(price)
 }
 
 func GetPrice() float64 {

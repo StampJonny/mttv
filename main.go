@@ -26,5 +26,6 @@ func main() {
 			trader.Buy()
 			fmt.Printf("%+v\n", "buying")
 		}
+
 	}
 }

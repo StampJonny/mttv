@@ -1,6 +1,7 @@
 package trader_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stampjohnny/mttv/exchange"
@@ -35,7 +36,8 @@ func (s *TestSuite) TestBuyCryptoIncreased() {
 	cryptoAmountToBuy := 0.001
 	prevCryptoBalance := exchange.GetCryptoBalance()
 
-	s.NoError(exchange.Buy(cryptoAmountToBuy))
+	_, err := exchange.Buy(cryptoAmountToBuy)
+	s.NoError(err)
 
 	expCrypto := prevCryptoBalance + cryptoAmountToBuy
 	s.Equal(expCrypto, exchange.GetCryptoBalance())
@@ -45,17 +47,21 @@ func (s *TestSuite) TestBuyMoneyDecreased() {
 	cryptoAmountToBuy := 0.001
 	prevMoneyBalance := exchange.GetMoneyBalance()
 
-	s.NoError(exchange.Buy(cryptoAmountToBuy))
+	_, err := exchange.Buy(cryptoAmountToBuy)
+	s.NoError(err)
 
 	expMoney := prevMoneyBalance - cryptoAmountToBuy*exchange.GetPrice()
 	s.Equal(expMoney, exchange.GetMoneyBalance())
 }
 
 func (s *TestSuite) TestBuyContextSaved() {
-	log, err := logging.Get(logging.TradingLog)
+	cryptoAmountToBuy := 0.001
+
+	log, err := logging.Get(logging.BuyLog)
 	defer func() { s.NoError(log.Remove()) }()
 
-	s.NoError(exchange.Buy(0.001))
+	ctx, err := exchange.Buy(cryptoAmountToBuy)
+	s.NoError(err)
 
 	s.NoError(err)
 	s.FileExists(log.GetFilepath())
@@ -66,7 +72,16 @@ func (s *TestSuite) TestBuyContextSaved() {
 	line, err := r.ReadLine()
 
 	s.NoError(err)
-	s.Contains(line, `"amount":0.001`)
+	type i interface {
+		GetAmount() float64
+		GetMoneyBalance() float64
+	}
+	s.Contains(line,
+		fmt.Sprintf("amount=%v", ctx.(i).GetAmount()),
+		log.GetFilepath())
+	s.Contains(line,
+		fmt.Sprintf("money=%v", ctx.(i).GetMoneyBalance()),
+		log.GetFilepath())
 
 	line, err = r.ReadLine()
 	s.Error(err)
