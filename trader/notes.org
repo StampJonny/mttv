@@ -1,0 +1,10 @@
+* Tasks
+** TODO TestBuyContextSaved
+   [2019-05-11 Sa]
+   [[file:~/go/src/github.com/stampjohnny/mttv/trader/buy_test.go::func%20(s%20*TestSuite)%20TestBuyContextSaved()%20{]]
+** TODO TestBuyMoneyDecreased
+   [2019-05-11 Sa]
+   [[file:~/go/src/github.com/stampjohnny/mttv/trader/buy_test.go::func%20(s%20*TestSuite)%20TestBuyMoneyDecreased()%20{]]
+** TODO TestBuyCryptoIncreased
+   [2019-05-11 Sa]
+   [[file:~/go/src/github.com/stampjohnny/mttv/trader/buy_test.go::func%20(s%20*TestSuite)%20TestBuyCryptoIncreased()%20{]]
