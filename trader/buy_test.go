@@ -66,7 +66,7 @@ func (s *TestSuite) TestBuyContextSaved() {
 	line, err := r.ReadLine()
 
 	s.NoError(err)
-	s.Contains(line, `amount":0.001`)
+	s.Contains(line, `"amount":0.001`)
 
 	line, err = r.ReadLine()
 	s.Error(err)
