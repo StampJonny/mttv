@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
+	"github.com/stampjohnny/mttv/config"
 	"github.com/stampjohnny/mttv/e"
 	"github.com/stampjohnny/mttv/utils"
 )
 
-var BuyLog = "logs/buy"
+var BuyLog = "buy"
 
 type Logger struct {
 	filepath string
@@ -38,11 +39,10 @@ func LogBuyContext(buyContext interface {
 	if err != nil {
 		return e.Err("can't get logger %s: %v", BuyLog, err)
 	}
-
-	amount := buyContext.GetAmount()
-	Debug("amount=%v", amount)
-	money := buyContext.GetMoneyBalance()
-	Debug("money=%v", money)
+	EnableDebug()
+	amount := utils.Tostring(buyContext.GetAmount())
+	money := utils.Tostring(buyContext.GetMoneyBalance())
+	Debug("amount=%v, money=%s", amount, money)
 
 	l.log.WithFields(Fields{
 		"amount": amount,
@@ -60,7 +60,10 @@ func (l *Logger) Log(message string) {
 	l.log.Info(message)
 }
 
-func (l *Logger) Remove() error {
+func (l *Logger) TestRemove() error {
+	if !utils.IsTestingMode() {
+		panic("Should be called only in testing mode")
+	}
 	return os.RemoveAll(l.filepath)
 }
 
@@ -71,7 +74,7 @@ func (l *Logger) Init() error {
 	}
 
 	l.log = logrus.New()
-	l.log.Formatter = new(logrus.TextFormatter)
+	l.log.Formatter = new(logrus.JSONFormatter)
 	l.log.Level = logrus.DebugLevel
 	l.log.Out = f
 
@@ -79,7 +82,7 @@ func (l *Logger) Init() error {
 }
 
 func create(name string) *Logger {
-	filePath := filepath.Join("/mttv/", name)
+	filePath := filepath.Join(config.BaseLogDir, name)
 	l := &Logger{filepath: filePath}
 	if err := l.Init(); err != nil {
 		utils.Crash("error while initializing looger %s: %s", name, err)

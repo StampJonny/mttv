@@ -23,8 +23,12 @@ func (s *TestSuite) SetupTest() {
 	s.NoError(
 		exchange.SetTestExchange(
 			func(c interface{}) {
-				ctx := c.(interface{ SetDefault() })
+				ctx := c.(interface {
+					SetDefault()
+					SetuptTestEnv()
+				})
 				ctx.SetDefault()
+				ctx.SetuptTestEnv()
 				s.ctx = c
 			},
 		),
@@ -55,10 +59,11 @@ func (s *TestSuite) TestBuyMoneyDecreased() {
 }
 
 func (s *TestSuite) TestBuyContextSaved() {
+	logging.EnableDebug()
 	cryptoAmountToBuy := 0.001
 
 	log, err := logging.Get(logging.BuyLog)
-	defer func() { s.NoError(log.Remove()) }()
+	s.NoError(err)
 
 	ctx, err := exchange.Buy(cryptoAmountToBuy)
 	s.NoError(err)
@@ -77,10 +82,10 @@ func (s *TestSuite) TestBuyContextSaved() {
 		GetMoneyBalance() float64
 	}
 	s.Contains(line,
-		fmt.Sprintf("amount=%v", ctx.(i).GetAmount()),
+		fmt.Sprintf(`"amount":"%v"`, ctx.(i).GetAmount()),
 		log.GetFilepath())
 	s.Contains(line,
-		fmt.Sprintf("money=%v", ctx.(i).GetMoneyBalance()),
+		fmt.Sprintf(`"money":"%v"`, ctx.(i).GetMoneyBalance()),
 		log.GetFilepath())
 
 	line, err = r.ReadLine()

@@ -2,8 +2,10 @@ package exchange
 
 import (
 	"errors"
+	"io/ioutil"
 	"sync"
 
+	"github.com/stampjohnny/mttv/config"
 	"github.com/stampjohnny/mttv/e"
 	"github.com/stampjohnny/mttv/logging"
 	"github.com/stampjohnny/mttv/utils"
@@ -45,7 +47,7 @@ func (t *TestExchange) saveAmount(amount float64) {
 }
 
 func (t *TestExchange) Buy(amount float64) (interface{}, error) {
-	logging.Debug("amount=%v", 1)
+	logging.Debug("amount=%v", amount)
 	if t.isFreezed() {
 		return nil, e.Err("context is freezed")
 	}
@@ -63,9 +65,23 @@ func (t *TestExchange) Buy(amount float64) (interface{}, error) {
 	return t.Copy(), nil
 }
 func (t *TestExchange) getMoneyToPay() float64 {
-	return t.cryptoAmountToBuy * t.price
+	moneyToPay := t.cryptoAmountToBuy * t.price
+	logging.Debug("amountToBuy(%v) * price(%v) return %v", t.cryptoAmountToBuy, t.price, moneyToPay)
+	return moneyToPay
 }
 
+func (t *TestExchange) SetuptTestEnv() {
+	if t.isFreezed() {
+		utils.Crash("context is freezed")
+	}
+	tmpDir, err := ioutil.TempDir("", "mttv")
+	if err != nil {
+		panic(err)
+	}
+
+	config.BaseLogDir = tmpDir
+
+}
 func (t *TestExchange) SetDefault() {
 	if t.isFreezed() {
 		utils.Crash("context is freezed")
@@ -93,14 +109,15 @@ func (t *TestExchange) SetCryptoBalance(amount float64) error {
 }
 
 func (t *TestExchange) GetMoneyBalance() float64 {
+	logging.Debug("moneyBalance = %v", t.moneyBalance)
 	return t.moneyBalance
 }
 
 func (t *TestExchange) SetMoneyBalance(amount float64) error {
+	logging.Debug("set money balance: %v", amount)
 	if t.isFreezed() {
 		return e.Err("context is freezed")
 	}
-
 	if amount <= 0 {
 		return errors.New("can't set negative amount")
 	}
